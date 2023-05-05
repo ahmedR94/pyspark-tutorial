@@ -18,9 +18,10 @@ class Transformation:
         dataset = dataset.drop("_c6")
         return dataset
 
-    def apply_filters(self):
+    def apply_filters(self,dataset=None):
         """apply all transformations on the dataset"""
-        dataset = self.read_file()
+        if dataset is None:
+            dataset = self.read_file()
         # question 1
         dataset1 = dataset.filter(length(col("REPLACING-RENAULT-REF")) == 10)
         # question 2
