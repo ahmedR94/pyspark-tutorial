@@ -6,26 +6,26 @@
     Compare the results
 """
 
-import pandas as pd
-from main import Transformation
+import pytest
+# import pandas as pd
+from src.main import Transformation
+from chispa.dataframe_comparer import assert_df_equality
 
 input_path= "dataset/Chain_replacement.csv"
 output_path = "dataset/output"
 transformer = Transformation(input_path)
 
 
-def test_read_file():
-    df = transformer.read_file()
-    assert df.columns == [
-        'REPLACING-RENAULT-REF',
-        'REPLACING-SUPPLIER-REF',
-        'REPLACING-SUPPLIER-NAME',
-        'REPLACED-RENAULT-REF',
-        'REPLACED-SUPPLIER-REF',
-        'REPLACEMENT-DATE'
-        ]
+@pytest.mark.usefixtures('spark')
+def test_read_file(spark):
+    actual_df = spark.read.csv(input_path, header=True, sep="\t")
+    actual_df = actual_df.drop("_c6")
+    expected_df = transformer.read_file()
+    assert_df_equality(actual_df, expected_df)
 
-def test_apply_filters():
+
+@pytest.mark.usefixtures('spark')
+def test_apply_filters(spark):
     input_columns = [
         "REPLACING-RENAULT-REF", "REPLACING-SUPPLIER-REF", "REPLACING-SUPPLIER-NAME",
         "REPLACED-RENAULT-REF",	"REPLACED-SUPPLIER-REF", "REPLACEMENT-DATE", 	
@@ -41,13 +41,14 @@ def test_apply_filters():
         ('8660000712', '#N/A', 'aws', '8671000002', 'CONSOMMABLES','13/02/2014'),
         ('8660000713', '#N/A', 'CLOUD', '8671000003', 'CONSOMMABLES','13/02/2014')
     ]
-    input_df = transformer.spark.createDataFrame(input_data).toDF(*input_columns)
+    input_df = spark.createDataFrame(input_data).toDF(*input_columns)
     output_columns = input_columns + ["SHIPPING_DATE"]
     data = [("8660000025","EMPTY","SHELL","8671013785","NOUVEAU","03/11/2014","2023"), 
             ("8660000710","437444","Valeo","8671000000","EMPTY","13/02/2018","2024"), 
             ("8660000713","EMPTY","CLOUD","8671000003","CONSOMMABLES","13/02/2014","2022")]
-    excepted_df = transformer.spark.createDataFrame(data).toDF(*output_columns)
-    expected_pandas = excepted_df.toPandas()
+    excepted_df = spark.createDataFrame(data).toDF(*output_columns)
+    # expected_pandas = excepted_df.toPandas()
     output_df = transformer.apply_filters(dataset=input_df)
-    output_pandas = output_df.toPandas()
-    pd.testing.assert_frame_equal(output_pandas, expected_pandas, check_exact=True)
+    # output_pandas = output_df.toPandas()
+    # pd.testing.assert_frame_equal(output_pandas, expected_pandas, check_exact=True)
+    assert_df_equality(output_df, excepted_df)
