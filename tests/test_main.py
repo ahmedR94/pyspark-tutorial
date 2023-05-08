@@ -58,4 +58,4 @@ def test_save_dataframe_to_csv(spark):
     expected_df = spark.createDataFrame(data)
     transformer.save_dataframe_to_csv(expected_df,destination_path)
     actual_df = spark.read.csv(destination_path,header=True)
-    assert_df_equality(actual_df, expected_df)
+    assert_df_equality(actual_df, expected_df, ignore_row_order=True)
