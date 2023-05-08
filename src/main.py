@@ -1,6 +1,6 @@
 """main script"""
 
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import col, length, udf
 from pyspark.sql.types import StringType
 
@@ -12,13 +12,13 @@ class Transformation:
         """constructor"""
         self.file_path = file_path
 
-    def read_file(self):
+    def read_file(self) -> DataFrame :
         """Loads the csv file and returns the result as a DataFrame"""
         dataset = self.spark.read.csv(self.file_path, header=True, sep="\t")
         dataset = dataset.drop("_c6")
         return dataset
 
-    def apply_filters(self,dataset=None):
+    def apply_filters(self,dataset=None) -> DataFrame :
         """apply all transformations on the dataset"""
         if dataset is None:
             dataset = self.read_file()
