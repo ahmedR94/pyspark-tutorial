@@ -6,12 +6,14 @@
     Compare the results
 """
 
+import os
 import pytest
-from src.main import Transformation
+from src.main import Transformation, set_env_vars
 from chispa.dataframe_comparer import assert_df_equality
 
-input_path= "dataset/Chain_replacement.csv"
-output_path = "dataset/output"
+
+set_env_vars()
+input_path= os.getenv("input_path_dataset")
 transformer = Transformation(input_path)
 
 
