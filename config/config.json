@@ -1,0 +1,4 @@
+{
+    "input_path_dataset": "dataset/Chain_replacement.csv",
+    "output_path_dataset": "dataset/output"
+}
