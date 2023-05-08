@@ -1,14 +1,21 @@
 """main script"""
 
+import os
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import col, length, udf
 from pyspark.sql.types import StringType
+import json
+
+
+def set_env_vars():
+    for k, v in json.load(open('config/config.json')).items():
+        os.environ[k] = v
 
 
 class Transformation:
     spark = SparkSession.builder.appName("Exercice Pyspark").getOrCreate()
 
-    def __init__(self, file_path):
+    def __init__(self, file_path:str):
         """constructor"""
         self.file_path = file_path
 
@@ -72,15 +79,19 @@ class Transformation:
         return dataset4
 
     @staticmethod
-    def save_dataframe_to_csv(dataframe, destination_path):
+    def save_dataframe_to_csv(dataframe: DataFrame, destination_path: str)  -> None :
         """save pyspark dataframe in csv file"""
         dataframe.write.mode("overwrite").csv(destination_path, header=True)
 
 
 if __name__ == "__main__":
-    input_path= "dataset/Chain_replacement.csv"
-    output_path = "dataset/output"
+    set_env_vars()
+    input_path= os.getenv("input_path_dataset")
+    output_path = os.getenv("output_path_dataset")
+    # create object transformer
     transformer = Transformation(input_path)
+    # apply transformation
     final_dataset = transformer.apply_filters()
     print("transformation is done")
+    # load
     transformer.save_dataframe_to_csv(final_dataset, output_path)
