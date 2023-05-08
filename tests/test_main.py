@@ -1,5 +1,4 @@
-"""PySpark unit tests"""
-"""
+""" PySpark unit tests
     Create the input dataframe
     Create the output dataframe using the function we want to test
     Specify the expected output values
@@ -50,3 +49,13 @@ def test_apply_filters(spark):
     excepted_df = spark.createDataFrame(output_data).toDF(*output_columns)
     actual_df = transformer.apply_filters(dataset=input_df)
     assert_df_equality(actual_df, excepted_df)
+
+
+@pytest.mark.usefixtures('spark')
+def test_save_dataframe_to_csv(spark):
+    destination_path = 'dataset/output/test'
+    data = [{'name': 'Alice', 'id': "1"},{'name': 'Mario', 'id': "2"}]
+    expected_df = spark.createDataFrame(data)
+    transformer.save_dataframe_to_csv(expected_df,destination_path)
+    actual_df = spark.read.csv(destination_path,header=True)
+    assert_df_equality(actual_df, expected_df)
