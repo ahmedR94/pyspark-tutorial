@@ -18,10 +18,11 @@ transformer = Transformation(input_path)
 
 @pytest.mark.usefixtures('spark')
 def test_read_file(spark):
-    actual_df = spark.read.csv(input_path, header=True, sep="\t")
-    actual_df = actual_df.drop("_c6")
-    expected_df = transformer.read_file()
-    assert_df_equality(actual_df, expected_df)
+    data = [{'name': 'Alice', 'id': "1"},{'name': 'Mario', 'id': "2"}]
+    expected_df = spark.createDataFrame(data)
+    transf = Transformation('dataset/test_dataset.csv')
+    actual_df = transf.read_file()
+    assert_df_equality(actual_df, expected_df, ignore_row_order=True,ignore_column_order=True)
 
 
 @pytest.mark.usefixtures('spark')
